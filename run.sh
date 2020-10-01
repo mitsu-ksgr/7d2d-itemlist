@@ -7,7 +7,7 @@
 #   2. cp -R /opt/7daystodie/application/Data ./7d2d_app
 #   3. ls ./7d2d_app
 #       > Data
-#   4. ./run.sh ./7d2d_app/Data
+#   4. ./run.sh -f json -o out/out.json ./7d2d_app/Data
 #
 
 readonly DTAG="7d2d-itemlist"

@@ -197,43 +197,69 @@ def load_items(data_dir_path: str):
     return items
 
 
-def dump_to_str(items):
+def dump_to_text(out_file, items):
+    buf = []
     for item in items:
-        print(f"* {item.key}")
-        print(f"    Extend From     : {item.extends_from}")
-        print(f"    IconFileName    : {item.icon_file_name}")
-        print(f"    Name (en)       : {item.name_en}")
-        print(f"    Name (ja)       : {item.name_ja}")
-        print(f"    * Tags ({len(item.tags)})")
+        buf.append(f"* {item.key}")
+        buf.append(f"    Extend From     : {item.extends_from}")
+        buf.append(f"    IconFileName    : {item.icon_file_name}")
+        buf.append(f"    Name (en)       : {item.name_en}")
+        buf.append(f"    Name (ja)       : {item.name_ja}")
+        buf.append(f"    * Tags ({len(item.tags)})")
         if len(item.tags) == 0:
-            print("        - None")
+            buf.append("        - None")
         else:
             for tag in item.tags:
-                print(f"        - {tag}")
-        print(f"    * Unlocked By({len(item.unlocked_by)})")
+                buf.append(f"        - {tag}")
+        buf.append(f"    * Unlocked By({len(item.unlocked_by)})")
         if len(item.unlocked_by) == 0:
-            print("        - None")
+            buf.append("        - None")
         else:
             for tag in item.unlocked_by:
-                print(f"        - {tag}")
+                buf.append(f"        - {tag}")
+    print("\n".join(buf), file=out_file)
 
 
-def dump_to_json(items):
-    print(json.dumps(items, cls=ItemJsonEncoder, indent=4, ensure_ascii=False))
+def dump_to_json(out_file, items):
+    print(
+        json.dumps(items, cls=ItemJsonEncoder, indent=4, ensure_ascii=False),
+        file=out_file)
 
 
-def entrypoint(data_dir_path: str):
+def entrypoint(data_dir_path, out_format, out_path):
     items = load_items(data_dir_path)
-    dump_to_json(items)
+
+    if out_path:
+        out_file = open(out_path, 'w')
+    else:
+        out_file = sys.stdout
+
+    try:
+        if out_format == "json":
+            dump_to_json(out_file, items)
+        else:
+            dump_to_text(out_file, items)
+    finally:
+        if out_file is not sys.stdout:
+            out_file.close()
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Error: 7daystodie Data dir path is not specified.")
-        sys.exit()
+    import argparse
 
-    data_dir_path = sys.argv[1]
+    parser = argparse.ArgumentParser(description="Generate 7daystodie item list.")
+    parser.add_argument("data_dir_path", type=str,
+        help="Path to 7daystodie/Data directory.")
+    parser.add_argument("-f", "--format", type=str,
+        choices=["text", "json"], default="text",
+        help="Output format. text or json.")
+    parser.add_argument("-o", "--output", type=str, metavar='OUTPUT_PATH',
+        help="Output file path. if not specified, output to stdout.")
+    args = parser.parse_args()
+
+    data_dir_path = args.data_dir_path
     if data_dir_path.endswith('/'):
         data_dir_path = data_dir_path[:-1]
-    entrypoint(data_dir_path)
+
+    entrypoint(data_dir_path, args.format, args.output)
 
