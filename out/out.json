@@ -2342,7 +2342,7 @@
     },
     {
         "key": "ammoBundle762mmBulletHP",
-        "icon_file_name": null,
+        "icon_file_name": "ammo762mmBulletHP.png",
         "name_en": "Box of HP 7.62mm Ammo (100)",
         "name_ja": "HP 7.62mm弾（100）個入りの箱",
         "tags": [],
