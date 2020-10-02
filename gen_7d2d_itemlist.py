@@ -70,8 +70,9 @@ class ItemIconFileNameFinder:
 
     def find(self, key):
         k = f"{key}.png"
-        if k in self.file_names:
-            return k
+        for name in self.file_names:
+            if k.lower() == name.lower():
+                return name
         return None
 
 

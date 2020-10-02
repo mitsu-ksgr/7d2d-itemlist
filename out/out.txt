@@ -2074,7 +2074,7 @@
         - perkSniperComplete
 * ammoBundle762mmBulletHP
     Extend From     : ammoBundle762mmBulletBall
-    IconFileName    : None
+    IconFileName    : ammo762mmBulletHP.png
     Name (en)       : Box of HP 7.62mm Ammo (100)
     Name (ja)       : HP 7.62mm弾（100）個入りの箱
     * Tags (0)
