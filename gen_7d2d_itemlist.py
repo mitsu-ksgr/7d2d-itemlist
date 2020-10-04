@@ -173,13 +173,13 @@ def load_items(data_dir_path: str):
     try:
         i18n = Localization(path_i18n_csv)
         icon_finder = IconFileNameFinder(path_icons_dir)
-        xml_tree = ET.parse(path_items_xml)
+        xml_item_tree = ET.parse(path_items_xml)
     except FileNotFoundError as e:
         print(e)
         sys.exit(1)
 
     items = []
-    root = xml_tree.getroot()
+    root = xml_item_tree.getroot()
     for child in root:
         xi = XMLItem(root, child)
         loc = i18n.get(xi.key)
