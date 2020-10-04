@@ -10,6 +10,7 @@ import xml.etree.ElementTree as ET
 
 DIR_PATH_ICON_IMG_DIR = "ItemIcons"
 FILE_NAME_ITEMS_XML = "Config/items.xml"
+FILE_NAME_BLOCKS_XML = "Config/blocks.xml"
 FILE_NAME_LOCALIZATION_TXT = "Config/Localization.txt"
 
 
@@ -122,6 +123,39 @@ class XMLItem:
         self.unlocked_by = _read_prop_as_list(node, "./property[@name='UnlockedBy']", self.unlocked_by)
 
 
+class XMLBlock:
+    def __init__(self, root, node):
+        self.key = None
+        self.custom_icon = None
+        self.extends_from = None
+        self.tags = []
+        self.unlocked_by = []
+        self.parse(root, node)
+
+    def parse(self, root, node):
+        # Extends
+        extends = node.find("./property[@name='Extends']")
+        if extends is not None:
+            extend_from = extends.attrib["value"]
+            # TODO: support param1 attrib.
+            #extend_params = extends.attrib["param1"]
+            #if extend_params:
+            #    extend_params = [v.strip() for v in extend_params.split(",")]
+
+            src_node = root.find(f"block[@name='{extend_from}']")
+            if src_node is not None:
+                self.parse(root, src_node)
+            self.extends_from = extend_from
+        else:
+            self.extends_from = None
+
+        # Load params
+        self.key = node.attrib["name"]
+        self.tags = _read_prop_as_list(node, "./property[@name='Tags']", self.tags)
+        self.custom_icon = _read_prop(node, "./property[@name='CustomIcon']", self.custom_icon)
+        self.unlocked_by = _read_prop_as_list(node, "./property[@name='UnlockedBy']", self.unlocked_by)
+
+
 class Item(object):
     def __init__(self, **kwargs):
         self.key = kwargs.get("key")
@@ -160,16 +194,20 @@ def load_items(data_dir_path: str):
     path_i18n_csv = f"{data_dir_path}/{FILE_NAME_LOCALIZATION_TXT}"
     path_icons_dir = f"{data_dir_path}/{DIR_PATH_ICON_IMG_DIR}"
     path_items_xml = f"{data_dir_path}/{FILE_NAME_ITEMS_XML}"
+    path_blocks_xml = f"{data_dir_path}/{FILE_NAME_BLOCKS_XML}"
 
     try:
         i18n = Localization(path_i18n_csv)
         icon_finder = IconFileNameFinder(path_icons_dir)
         xml_item_tree = ET.parse(path_items_xml)
+        xml_block_tree = ET.parse(path_blocks_xml)
     except FileNotFoundError as e:
         print(e)
         sys.exit(1)
 
     items = []
+
+    # Load items.xml
     root = xml_item_tree.getroot()
     for child in root:
         xi = XMLItem(root, child)
@@ -186,6 +224,25 @@ def load_items(data_dir_path: str):
             unlocked_by = xi.unlocked_by,
             extends_from = xi.extends_from,
         ))
+
+    # Load blocks.xml
+    xml_block_root = xml_block_tree.getroot()
+    for child in xml_block_root:
+        xe = XMLBlock(xml_block_root, child)
+        loc = i18n.get(xe.key)
+        icon_file_name = icon_finder.find(
+            xe.custom_icon if xe.custom_icon else xe.key
+        )
+        items.append(Item(
+            key = xe.key,
+            icon_file_name = icon_file_name,
+            name_en = loc.get("english") if loc else None,
+            name_ja = loc.get("japanese") if loc else None,
+            tags = xe.tags + ['block'],
+            unlocked_by = xe.unlocked_by,
+            extends_from = xe.extends_from,
+        ))
+
     return items
 
 
