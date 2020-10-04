@@ -59,7 +59,7 @@ class Localization:
             self.dump(key)
 
 
-class ItemIconFileNameFinder:
+class IconFileNameFinder:
     def __init__(self, icon_dir_path: str):
         self.icon_dir_path = icon_dir_path
         self.file_names = []
@@ -172,7 +172,7 @@ def load_items(data_dir_path: str):
 
     try:
         i18n = Localization(path_i18n_csv)
-        icon_finder = ItemIconFileNameFinder(path_icons_dir)
+        icon_finder = IconFileNameFinder(path_icons_dir)
         xml_tree = ET.parse(path_items_xml)
     except FileNotFoundError as e:
         print(e)
