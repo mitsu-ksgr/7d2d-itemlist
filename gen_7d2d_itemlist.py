@@ -122,15 +122,6 @@ class XMLItem:
         self.unlocked_by = _read_prop_as_list(node, "./property[@name='UnlockedBy']", self.unlocked_by)
 
 
-class XMLItems:
-    def __init__(sefl):
-        self.items = []
-        pass
-
-    def parse(self, node):
-
-        pass
-
 class Item(object):
     def __init__(self, **kwargs):
         self.key = kwargs.get("key")
